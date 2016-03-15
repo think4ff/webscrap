@@ -24,7 +24,8 @@ import com.aurg.webscrap.data.DataRoot.TYPE;
 import com.aurg.webscrap.data.DataSagunInput;
 import com.aurg.webscrap.data.DataSagunOutput;
 import com.aurg.webscrap.parser.HtmlParserAuction;
-import com.aurg.webscrap.parser.HtmlParserSagun;
+//import com.aurg.webscrap.parser.HtmlParserSagun;
+import com.aurg.webscrap.parser.HtmlParserSagunNew;
 
 
 /* 사건검색 Tab2 Sample 
@@ -235,7 +236,9 @@ public class HttpIO extends Thread {
             if( response.getStatusLine().toString().equals("HTTP/1.1 200 OK")) 
             {
             	// Parsing 처리
-            	rtn = HtmlParserSagun.doParsing( tab, input, EntityUtils.toString(response.getEntity()), output );
+            	//rtn = HtmlParserSagun.doParsing( tab, input, EntityUtils.toString(response.getEntity()), output );
+            	//XXX:변경
+            	rtn = HtmlParserSagunNew.doParsing( tab, input, EntityUtils.toString(response.getEntity()), output );
             }
             else    // fail시에 실패 원인을 얻어온다. 
             {

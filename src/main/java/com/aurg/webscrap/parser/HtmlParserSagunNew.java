@@ -1,15 +1,19 @@
 package com.aurg.webscrap.parser;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.*;
+import org.jsoup.select.*;
 
 import com.aurg.webscrap.data.DataSagunInput;
 import com.aurg.webscrap.data.DataSagunOutput;
 import com.aurg.webscrap.data.MyInt;
 
-public class HtmlParserSagun extends HtmlParser {
+public class HtmlParserSagunNew extends HtmlParser {
 
-	protected static Logger logger = Logger.getLogger(HtmlParserSagun.class
-			.getName());
+	protected static Logger logger = LoggerFactory.getLogger(HtmlParserSagunNew.class);
 
 	static public boolean doParsing(int tab, DataSagunInput input, String html, DataSagunOutput result) {
 		// for test - 전체 HTML 출력
@@ -24,38 +28,38 @@ public class HtmlParserSagun extends HtmlParser {
 		return false;
 	}
 
-	static boolean parseTab1(DataSagunInput input, String html,
-			DataSagunOutput result) {
+	static boolean parseTab1(DataSagunInput input, String html, DataSagunOutput result) {
 		int pos;
 		String tempStr;
 
-		logger.info("called");
-
-		// 입력 오유인지를 판변한다.
-		//
+		// 입력 오류인지를 판변한다.
 		if (html.indexOf("사건이 존재하지 않습니다") >= 0) {
 			result.fail_reason = "사건이 존재하지 않습니다.사건정보를 확인하세요.";
 			return false;
 		}
 
-		// 사건번호
-		pos = html.indexOf(">사건번호 : ");
-		if (pos >= 0) {
-			// 법원에서 얻는 사건번호 형식은 - 인천지방법원 2013개회45918
-			// 결과로 생성해야 하는 사건번호 형식은 - 인천지방법원2013개회045918-03
-			// 그래서 적절한 가공이 필요하다.
-			// 1. 사건번호를 얻는다. > 인천지방법원 2013개회45918
-			tempStr = cut_value_in_nextBlock(html, ": ", new MyInt(pos), "</td");
-			// System.out.println(" 1:[" + tempStr+"]");
-			// 2. 공백뒤 부분만 잘라낸다. > 2013개회45918
-			tempStr = tempStr.substring(tempStr.indexOf(" ") + 1);
-			// System.out.println(" 2:[" + tempStr +"]");
-			// 3. 사건번호에 0을 붙이기 위해서, 앞 6자리(2013개회)까지 자르고, 사건번호와 lpas 법원코드를 붙인다.
-			result.key = tempStr.substring(0, 6) + input.getSa_serial() + "-"
-					+ input.getBub_lpas_cd();
-			// System.out.println(" 3:[" + result.key+"]");
+		Document doc = Jsoup.parse(html);
 
-		}
+		// 사건번호
+		Element eleContent = doc.select("div.pop_title").first();
+		String popTitle = eleContent.text();
+		
+//		logger.debug("popTitle_______{}", popTitle);
+//		logger.debug("popTitle_index_______{}", popTitle.substring(popTitle.indexOf(" : ")+3));
+
+		// 법원에서 얻는 사건번호 형식은 - 인천지방법원 2013개회45918
+		// 결과로 생성해야 하는 사건번호 형식은 - 인천지방법원2013개회045918-03
+		// 그래서 적절한 가공이 필요하다.
+		// 1. 사건번호를 얻는다. > 인천지방법원 2013개회45918
+		tempStr = popTitle.substring(popTitle.indexOf(" : ")+3);
+		
+		// System.out.println(" 1:[" + tempStr+"]");
+		// 2. 공백뒤 부분만 잘라낸다. > 2013개회45918
+		tempStr = tempStr.substring(tempStr.indexOf(" ") + 1);
+		// System.out.println(" 2:[" + tempStr +"]");
+		// 3. 사건번호에 0을 붙이기 위해서, 앞 6자리(2013개회)까지 자르고, 사건번호와 lpas 법원코드를 붙인다.
+		result.key = tempStr.substring(0, 6) + input.getSa_serial() + "-" + input.getBub_lpas_cd();
+		// System.out.println(" 3:[" + result.key+"]");
 
 		// 재판부
 		pos = html.indexOf("재판부");
