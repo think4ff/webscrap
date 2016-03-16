@@ -1,3 +1,6 @@
+*.log
+
 /target/
 /output/
-/log/
+#/log/
+/.settings/
